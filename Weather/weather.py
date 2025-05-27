@@ -1,6 +1,6 @@
 import pandas as pd
 
-from Cashe import open_meteo
+from Caсhe import open_meteo
 from Config import logger, WEATHER_URL, WEATHER_CODES
 
 

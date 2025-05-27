@@ -39,8 +39,8 @@
     │   │   └── index.html
     │   ├── app.py
     │   └── roures.py
-    ├── Cashe/
-    │   └── cashe.py
+    ├── Cache/
+    │   └── cache.py
     ├── City/
     │   └── city.py
     ├── Config/

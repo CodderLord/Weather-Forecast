@@ -1,0 +1,1 @@
+from .caсhe import open_meteo
