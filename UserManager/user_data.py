@@ -19,7 +19,7 @@ def load_json_file(filename, default):
 
 def save_json_file(filename, data):
     try:
-        if os.path.exists("DB"):
+        if not os.path.exists("DB"):
           os.makedirs("DB")
         with open(filename, "w") as f:
          json.dump(data, f, indent=2)
