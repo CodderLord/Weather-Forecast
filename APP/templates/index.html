@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прогноз погоды</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Main styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Anim background */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            transition: all 2s ease;
+        }
+
+        .day .background {
+            background: linear-gradient(135deg, #56ccf2 0%, #2f80ed 100%);
+        }
+
+        .evening .background {
+            background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+        }
+
+        .night .background {
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+        }
+
+        /* Sky anim */
+        .sky-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        /* Sun */
+        .sun-moon {
+            position: absolute;
+            top: 10%;
+            left: -100px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            z-index: 1;
+            animation: sunMoonMove 120s linear infinite;
+        }
+
+        .sun {
+            background: #FDB813;
+            box-shadow: 0 0 50px #FDB813;
+        }
+
+        .moon {
+            background: #f5f5f5;
+            box-shadow: 0 0 30px rgba(245, 245, 245, 0.8);
+            opacity: 0;
+        }
+
+        /* Clouds */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 50%;
+            filter: blur(15px);
+            z-index: 0;
+            animation: cloudMove linear infinite;
+        }
+
+        /* Animations */
+        @keyframes sunMoonMove {
+            0% { transform: translateX(-20vw); opacity: 0; }
+            10% { opacity: 1; }
+            45% { opacity: 1; }
+            50% { transform: translateX(50vw); opacity: 0; }
+            100% { transform: translateX(120vw); opacity: 0; }
+        }
+
+        @keyframes cloudMove {
+            0% { transform: translateX(-30vw); }
+            100% { transform: translateX(100vw); }
+        }
+
+        /* Main Container */
+        .main-container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Card search */
+        .search-card {
+            background: rgba(255, 255, 255, 0.95) !important;
+            border: none !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border-radius: 15px;
+        }
+
+        /* Search field and hints */
+        .search-wrapper {
+            position: relative;
+        }
+
+        #suggestions {
+            position: absolute;
+            z-index: 10000;
+            width: calc(100% - 30px);
+            top: 100%;
+            left: 0;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background: white;
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: #f8f9fa;
+        }
+
+        /* Cards for weather */
+        .weather-card {
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: none;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+        }
+
+        .current-weather {
+            background: linear-gradient(135deg, rgba(114, 182, 240, 0.95) 0%, rgba(58, 123, 213, 0.95) 100%);
+            color: white;
+        }
+
+        /* Adaptivity */
+        @media (max-width: 768px) {
+            .temp-display {
+                font-size: 2.5rem !important;
+            }
+
+            .weather-card {
+                backdrop-filter: blur(5px);
+            }
+        }
+
+        /* Styles for history */
+        .history-alert {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-alert:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background -->
+    <div class="background"></div>
+
+    <!-- Anim sky -->
+    <div class="sky-container">
+        <div class="sun-moon sun"></div>
+        <div class="sun-moon moon"></div>
+
+        <!-- Clouds -->
+        <div class="cloud" style="width: 200px; height: 60px; top: 20%; animation-duration: 150s;"></div>
+        <div class="cloud" style="width: 250px; height: 80px; top: 25%; animation-duration: 180s; animation-delay: -30s;"></div>
+        <div class="cloud" style="width: 180px; height: 70px; top: 30%; animation-duration: 200s; animation-delay: -60s;"></div>
+    </div>
+
+    <!-- Main -->
+    <div class="main-container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Find cards -->
+                <div class="card search-card mb-4">
+                    <div class="card-body text-center">
+                        <h1 class="mb-4">Прогноз погоды</h1>
+
+                        {% if last_city %}
+                        <div class="alert alert-info history-alert mb-3" id="lastCityAlert">
+                            Хотите посмотреть погоду в <strong>{{ last_city }}</strong> снова?
+                        </div>
+                        {% endif %}
+
+                        <div class="search-wrapper">
+                            <form id="weatherForm">
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control form-control-lg"
+                                           id="cityInput" placeholder="Введите город..."
+                                           autocomplete="off" aria-label="Город">
+                                    <button class="btn btn-primary btn-lg" type="submit">
+                                        <span id="submitText">Поиск</span>
+                                        <span id="loadingSpinner" class="spinner-border spinner-border-sm ms-2" role="status" style="display: none;"></span>
+                                    </button>
+                                </div>
+                                <div id="suggestions" class="list-group"></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div id="weatherResult" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Init the time of day
+            updateTimeOfDay();
+
+            // Processing click on last city
+            $("#lastCityAlert").click(function() {
+                const city = "{{ last_city }}";
+                $("#cityInput").val(city);
+                $("#weatherForm").submit();
+            });
+
+            // Autocomplete cities
+            $("#cityInput").on("input", function() {
+                const query = $(this).val().trim();
+                if (query.length < 2) {
+                    $("#suggestions").hide().empty();
+                    return;
+                }
+
+                clearTimeout($(this).data('timer'));
+                $(this).data('timer', setTimeout(() => {
+                    $.get("/get_suggestions", {query: query})
+                        .done(function(data) {
+                            const $suggestions = $("#suggestions").empty();
+                            if (data.length) {
+                                data.forEach(item => {
+                                    $suggestions.append(`<div class="suggestion-item">${item}</div>`);
+                                });
+                                $suggestions.show();
+                            } else {
+                                $suggestions.hide();
+                            }
+                        })
+                        .fail(function() {
+                            $("#suggestions").hide();
+                        });
+                }, 300));
+            });
+
+            // Choice tooltips
+            $(document).on("click", ".suggestion-item", function() {
+                $("#cityInput").val($(this).text()).focus();
+                $("#suggestions").hide();
+            });
+
+            // Hide tooltips when clicking outside
+            $(document).on("click", function(e) {
+                if (!$(e.target).closest("#cityInput, #suggestions").length) {
+                    $("#suggestions").hide();
+                }
+            });
+
+            // Send weather form
+            $("#weatherForm").submit(function(e) {
+                e.preventDefault();
+                const city = $("#cityInput").val().trim();
+                if (!city) return;
+
+                $("#loadingSpinner").show();
+                $("#submitText").text("Поиск...");
+                $("#weatherResult").hide();
+
+                $.ajax({
+                    url: "/get_weather",
+                    method: "POST",
+                    data: {city: city},
+                    success: displayWeather,
+                    error: function(xhr) {
+                        let errorMsg = "Ошибка получения данных";
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMsg = xhr.responseJSON.error;
+                            if (xhr.responseJSON.details) {
+                                errorMsg += ": " + xhr.responseJSON.details;
+                            }
+                        }
+                        alert(errorMsg);
+                    },
+                    complete: function() {
+                        $("#loadingSpinner").hide();
+                        $("#submitText").text("Поиск");
+                    }
+                });
+            });
+
+            // Display Forecast
+            function displayWeather(data) {
+                const $result = $("#weatherResult").empty().show();
+
+                // Today weather
+                $result.append(`
+                    <div class="card weather-card current-weather mb-4">
+                        <div class="card-body">
+                            <h2 class="card-title text-center mb-4">
+                                <i class="${getWeatherIcon(data.current.weather)}"></i> ${data.city}
+                            </h2>
+                            <div class="row align-items-center">
+                                <div class="col-md-6 text-center mb-3 mb-md-0">
+                                    <div class="display-3 fw-bold">${data.current.temperature}°C</div>
+                                    <div class="h4">${data.current.weather}</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="h5 mb-2"><i class="fas fa-temperature-low"></i> Ощущается как ${data.current.feels_like}°C</div>
+                                    <div class="h5 mb-2"><i class="fas fa-tint"></i> Влажность: ${data.current.humidity}%</div>
+                                    <div class="h5 mb-2"><i class="fas fa-wind"></i> Ветер: ${data.current.wind_speed} м/с</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+
+                // Forecast
+                let forecastHtml = `
+                    <div class="card weather-card mb-4">
+                        <div class="card-body">
+                            <h3 class="text-center mb-4">Прогноз на неделю</h3>
+                            <div class="row g-3">
+                `;
+
+                data.forecast.forEach(day => {
+                    forecastHtml += `
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                            <div class="card weather-card h-100">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">${day.date}</h5>
+                                    <div class="h4 mb-2"><i class="${getWeatherIcon(day.weather)}"></i> ${day.weather}</div>
+                                    <div class="d-flex justify-content-around">
+                                        <div>
+                                            <div class="text-muted small">Макс</div>
+                                            <div class="h5">${day.temp_max}°C</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-muted small">Мин</div>
+                                            <div class="h5">${day.temp_min}°C</div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 small"><i class="fas fa-umbrella"></i> Осадки: ${day.precipitation}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                $result.append(forecastHtml + `</div></div></div>`);
+            }
+
+            // IconsWeather
+            function getWeatherIcon(condition) {
+                condition = condition.toLowerCase();
+                if (condition.includes('дождь')) return 'fas fa-cloud-rain';
+                if (condition.includes('снег')) return 'fas fa-snowflake';
+                if (condition.includes('облачно')) return 'fas fa-cloud';
+                if (condition.includes('ясно') || condition.includes('солнечно')) return 'fas fa-sun';
+                if (condition.includes('туман')) return 'fas fa-smog';
+                if (condition.includes('гроза')) return 'fas fa-bolt';
+                return 'fas fa-cloud-sun';
+            }
+        });
+
+        function updateTimeOfDay() {
+            const now = new Date();
+            const hours = now.getHours();
+            const body = document.body;
+
+            body.classList.remove('morning', 'day', 'evening', 'night');
+
+            if (hours >= 5 && hours < 10) {
+                body.classList.add('morning');
+            } else if (hours >= 10 && hours < 17) {
+                body.classList.add('day');
+            } else if (hours >= 17 && hours < 20) {
+                body.classList.add('evening');
+            } else {
+                body.classList.add('night');
+            }
+        }
+
+        setInterval(updateTimeOfDay, 60000);
+        updateTimeOfDay();
+    </script>
+</body>
+</html>
