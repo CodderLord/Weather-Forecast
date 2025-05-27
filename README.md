@@ -27,6 +27,40 @@
   - #### API: Open-Meteo, DaData
   - #### Инфраструктура: Docker
 
+
+- #### Структура проекта
+```commandline
+    weather-app/
+    ├── API_documentation/
+    │   ├── API_DOC.md
+    │   └── get_city_history.py
+    ├── APP/
+    │   ├── templates
+    │   │   └── index.html
+    │   ├── app.py
+    │   └── roures.py
+    ├── Cashe/
+    │   └── cashe.py
+    ├── City/
+    │   └── city.py
+    ├── Config/
+    │   ├── config.py   
+    │   └── log_config.py
+    ├── icons/
+    ├── UserManager/
+    │   └── user_data.py
+    ├── Weather/
+    │   └── weather.py
+    ├── logs/
+    │   └── weathers.py
+    ├── DB/
+    │   ├── user_history.json
+    │   └── city_stats.json
+    ├── Dockerfile           
+    ├── requirements.txt     
+    └── README.md            
+```
+
 ## Лицензия
 Проект создавался как тестовый. Проект распространяется под лицензией MIT.
 
