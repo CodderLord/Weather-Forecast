@@ -20,12 +20,9 @@ def load_json_file(filename, default):
 def save_json_file(filename, data):
     try:
         if os.path.exists("DB"):
-            with open(filename, "w") as f:
-                json.dump(data, f, indent=2)
-        else:
-            os.makedirs("DB")
-            with open(filename, "w") as f:
-                json.dump(data, f, indent=2)
+          os.makedirs("DB")
+        with open(filename, "w") as f:
+         json.dump(data, f, indent=2)
     except Exception as e:
         logger.error(f"Error saving {filename}: {str(e)}")
 
