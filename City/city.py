@@ -73,13 +73,22 @@ def get_city_coordinates(city_name):
         response.raise_for_status()
 
         location = response.json().get("suggestions", [{}])[0].get("data", {})
-        if "geo_lat" in location:
-            coordinates = (float(location["geo_lat"]), float(location["geo_lon"]))
-            logger.debug(f"Found coordinates for {city_name}: {coordinates}")
-            return coordinates
+
+        geo_lat = location.get("geo_lat")
+        geo_lon = location.get("geo_lon")
+
+        if geo_lat is not None and geo_lon is not None and geo_lat != "" and geo_lon != "":
+            try:
+                coordinates = (float(geo_lat), float(geo_lon))
+                logger.debug(f"Found coordinates for {city_name}: {coordinates}")
+                return coordinates
+            except (ValueError, TypeError) as e:
+                logger.error(f"Invalid coordinate values for {city_name}: lat={geo_lat}, lon={geo_lon}")
+                return None, None
         else:
-            logger.warning(f"No coordinates found for city: {city_name}")
+            logger.warning(f"No valid coordinates found for city: {city_name}")
             return None, None
+
     except requests.RequestException as e:
         logger.error(f"Error getting coordinates: {str(e)}")
         return None, None
