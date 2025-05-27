@@ -27,9 +27,44 @@
   - #### API: Open-Meteo, DaData
   - #### Инфраструктура: Docker
 
+    - ### Установка
+    - Через ```git clone```/ ```docker```
+      - Установка через ```git clone```
+        - Установить python 3.10+
+        - Клонировать проект в репозиторий 
+        ```bash
+          git clone https://github.com/CodderLord/Weather-Forecast.git
+        ```
+        - Создаём виртуальную среду
+            ```bash
+            python -m venv .venv
+            ```
+          - Активируем виртуальную среду:
+            - windows
+              ```bash
+              .venv\Scripts\activate
+              ```
+            - linux/MacOS
+              ```bash
+              source .venv/bin/activate
+              ```
+        - Установить зависимости 
+        ```bash
+          pip install -r requirements.txt
+        ```
+        - Запуск через ```python main.py```
+        - Установка через Dockerfile 
+          - Скачать [Docker](https://www.docker.com/products/docker-desktop/)
+          - [Скачать Dockerfile](https://raw.githubusercontent.com/CodderLord/Weather-Forecast/refs/heads/master/Dockerfile)
+          - ```bash
+            docker build -t weather .
+          - ```bash
+            docker run --rm -p 8080:8080 weather
+            
+
 
 - #### Структура проекта
-```commandline
+```
     weather-app/
     ├── API_documentation/
     │   ├── API_DOC.md
@@ -64,13 +99,4 @@
 ## Лицензия
 Проект создавался как тестовый. Проект распространяется под лицензией MIT.
 
-
-#### Email:
-```
-verevkin0909@gmail.com
-```
-#### Telegram: 
-```
-@kail_inv
-```
 
