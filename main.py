@@ -4,4 +4,4 @@ from Config import IP, PORT
 
 
 if __name__ == "__main__":
-    weather_app.run(debug=False,host=IP, port=PORT)
+    weather_app.run(debug=False, host=IP, port=PORT)
