@@ -11,27 +11,28 @@ def get_weather_data(lat, lon):
     :param lon: Longitude
     :return: response or None
     """
+    if lat is None or lon is None:
+        logger.error("Invalid coordinates: lat or lon is None")
+        return None
+
     url = f"{WEATHER_URL}/forecast"
     logger.debug(f'Get weather {lat=}, {lon=}')
-    params = {
-        "latitude": lat,
-        "longitude": lon,
-        "current": ["temperature_2m", "relative_humidity_2m",
-                    "apparent_temperature", "weather_code",
-                    "wind_speed_10m"],
-        "daily": ["weather_code", "temperature_2m_max",
-                  "temperature_2m_min", "precipitation_probability_max"],
-        "timezone": "auto",
-        "forecast_days": 8
-    }
 
     try:
-        # Make a request through the caching module
-        response = open_meteo.weather_api(url, params=params)[0]
-        logger.debug(f'Get weather api get response')
+        response = open_meteo.weather_api(url, params={
+            "latitude": lat,
+            "longitude": lon,
+            "current": ["temperature_2m", "relative_humidity_2m",
+                        "apparent_temperature", "weather_code",
+                        "wind_speed_10m"],
+            "daily": ["weather_code", "temperature_2m_max",
+                      "temperature_2m_min", "precipitation_probability_max"],
+            "timezone": "auto",
+            "forecast_days": 8
+        })[0]
         return response
     except Exception as e:
-        logger.error(f"Error retrieving weather data: {e}")
+        logger.error(f"Weather API error for {lat},{lon}: {e}")
         return None
 
 
@@ -49,9 +50,9 @@ def format_weather_data(response, original_city):
         if hasattr(value, 'item'):
             return float(value.item())
         return float(value) if isinstance(value, (float, int)) else value
-
     try:
         current = response.Current()
+        logger.debug(f"WEATHER_CODES is {int(current.Variables(3).Value())}")
         current_data = {
             "temperature": int(convert_value(current.Variables(0).Value())),
             "humidity": convert_value(current.Variables(1).Value()),
